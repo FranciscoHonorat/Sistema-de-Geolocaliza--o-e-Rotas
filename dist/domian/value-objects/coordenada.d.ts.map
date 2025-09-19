@@ -1,0 +1,1 @@
+{"version":3,"file":"coordenada.d.ts","sourceRoot":"","sources":["../../../domian/value-objects/coordenada.ts"],"names":[],"mappings":"AAKA,qBAAa,UAAU;IAEf,OAAO,CAAC,QAAQ;IAChB,OAAO,CAAC,SAAS;gBADT,QAAQ,EAAE,MAAM,EAChB,SAAS,EAAE,MAAM;IAa7B,YAAY,CAAC,KAAK,EAAE,UAAU,GAAG,MAAM;CAc1C"}

@@ -1,0 +1,24 @@
+{
+  "name": "sistema-geolocalizacao-rotas",
+  "version": "1.0.0",
+  "description": "Sistema de geolocalização e cálculo de rotas",
+  "main": "index.js",
+  "scripts": {
+    "dev": "ts-node teste-exemplo.ts",
+    "build": "tsc",
+    "start": "node dist/teste-exemplo.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "geolocalização",
+    "rotas",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}
