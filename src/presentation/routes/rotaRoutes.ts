@@ -1,8 +1,33 @@
 import { Router } from 'express';
+import { CalcularRotaUseCase } from '../../application/use-cases/CalcularRotaUseCase';
 import { RotaController } from '../controllers/RotaController';
+import type { IEnderecoRepository } from '../../application/interfaces/repositories/IEnderecoRepository';
 
 const router = Router();
-const rotaController = new RotaController();
+
+// 🔧 Mock Repository para testes (substitui banco de dados)
+const mockEnderecoRepository: IEnderecoRepository = {
+  async buscarPorCep(cep: string) {
+    // Mock simples - retorna estrutura completa do DTO
+    return {
+      enderecoCompleto: `${cep} - Rua Teste, Centro, São Paulo - SP`,
+      rua: "Rua Teste",
+      bairro: "Centro", 
+      cidade: "São Paulo",
+      estado: "SP",
+      pais: "Brasil",
+      cep,
+      coordenadas: { latitude: -23.5505, longitude: -46.6333 },
+      provedor: "Mock",
+      calculadoEm: new Date().toISOString(),
+      tempoDeProcessamento: 50
+    };
+  }
+};
+
+// ✅ Dependency Injection correto
+const calcularRotaUseCase = new CalcularRotaUseCase(mockEnderecoRepository);
+const rotaController = new RotaController(calcularRotaUseCase);
 
 // Todas as rotas de /api/rotas/*
 router.post('/calcular', (req, res) => {

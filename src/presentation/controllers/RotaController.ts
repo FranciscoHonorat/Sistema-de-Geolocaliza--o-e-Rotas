@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import { CalcularRotaInputDTO, CalcularRotaUseCase } from '../../application';
 
 export class RotaController {
+    constructor(private calcularRotaUseCase: CalcularRotaUseCase) {}
+
     async calcularDistancia(req: Request, res: Response) {
         try {
             // Extrair dados
@@ -33,8 +35,7 @@ export class RotaController {
             };
 
             // Controller novo (via Use Case):
-            const useCase = new CalcularRotaUseCase();
-            const resultado = await useCase.executar(input);
+            const resultado = await this.calcularRotaUseCase.executar(input);
             return res.json(resultado);
             
         } catch (error: any) {
