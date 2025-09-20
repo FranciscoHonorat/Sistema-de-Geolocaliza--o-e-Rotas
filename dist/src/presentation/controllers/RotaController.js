@@ -1,10 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RotaController = void 0;
-const rota_1 = require("../../domian/entities/rota");
-const coordenada_1 = require("../../domian/value-objects/coordenada");
+const application_1 = require("../../application");
 class RotaController {
-    calcularDistancia(req, res) {
+    async calcularDistancia(req, res) {
         try {
             // Extrair dados
             const { origem, destino } = req.body;
@@ -14,28 +13,25 @@ class RotaController {
                 return res.status(400).json({ erro: 'Origem e destino são obrigatórios.' });
             }
             //verificar se lat e lng são números
-            if (origem.lat === undefined || origem.lng === undefined ||
-                destino.lat === undefined || destino.lng === undefined) {
+            if (origem.latitude === undefined || origem.longitude === undefined ||
+                destino.latitude === undefined || destino.longitude === undefined) {
                 return res.status(400).json({ erro: 'Latitude e longitude são obrigatórios.' });
             }
-            // Converter para objetos de domínio (como criar coordenada e rota)
-            const coordOrigem = new coordenada_1.Coordenada(origem.lat, origem.lng);
-            const coordDestino = new coordenada_1.Coordenada(destino.lat, destino.lng);
-            const rotaId = `rota-${Date.now()}`;
-            const novaRota = new rota_1.Rota(rotaId, coordOrigem, coordDestino);
-            // Executar lógica (que método chamar?)
-            const distancia = novaRota.distanciaTotal;
-            // Formatar resposta
-            return res.status(200).json({
-                id: novaRota.getId,
-                distancia: Math.round(distancia),
-                origem: { lat: origem.lat, lng: origem.lng },
-                destino: { lat: destino.lat, lng: destino.lng },
-                unidade: 'km',
-                calculadoEm: new Date().toISOString(),
-                algoritmo: 'haversine',
-                versaoApi: '1.0.0'
-            });
+            // Criar DTO de entrada
+            const input = {
+                origem: {
+                    latitude: origem.latitude,
+                    longitude: origem.longitude
+                },
+                destino: {
+                    latitude: destino.latitude,
+                    longitude: destino.longitude
+                }
+            };
+            // Controller novo (via Use Case):
+            const useCase = new application_1.CalcularRotaUseCase();
+            const resultado = await useCase.executar(input);
+            return res.json(resultado);
         }
         catch (error) {
             // Tratar erros (que status code? que mensagem?)

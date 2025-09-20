@@ -1,0 +1,1 @@
+{"version":3,"file":"CoordenadaDTO.d.ts","sourceRoot":"","sources":["../../../../src/application/dtos/CoordenadaDTO.ts"],"names":[],"mappings":"AAAA,MAAM,WAAW,aAAa;IAE1B,QAAQ,EAAE,MAAM,CAAC;IACjB,SAAS,EAAE,MAAM,CAAC;IAGlB,QAAQ,CAAC,EAAE,MAAM,CAAC;IAClB,QAAQ,CAAC,EAAE,MAAM,CAAC;IAGlB,oBAAoB,CAAC,EAAE,OAAO,GAAG,QAAQ,GAAG,OAAO,CAAC;CACvD"}

@@ -1,0 +1,1 @@
+{"version":3,"file":"ICalcularRotaUseCase.d.ts","sourceRoot":"","sources":["../../../../src/application/interfaces/ICalcularRotaUseCase.ts"],"names":[],"mappings":"AAGA,OAAO,KAAK,EAAE,oBAAoB,EAAE,qBAAqB,EAAE,MAAM,SAAS,CAAC;AAE3E,MAAM,WAAW,oBAAoB;IACjC;;;;;OAKG;IACH,OAAO,CAAC,KAAK,EAAE,oBAAoB,GAAG,OAAO,CAAC,qBAAqB,CAAC,CAAC;CACxE"}

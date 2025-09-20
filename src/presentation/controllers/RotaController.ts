@@ -1,9 +1,8 @@
 import { Request, Response } from 'express';
-import { Rota } from '../../domian/entities/rota';
-import { Coordenada } from '../../domian/value-objects/coordenada';
+import { CalcularRotaInputDTO, CalcularRotaUseCase } from '../../application';
 
 export class RotaController {
-    calcularDistancia(req: Request, res: Response) {
+    async calcularDistancia(req: Request, res: Response) {
         try {
             // Extrair dados
             const { origem, destino } = req.body;
@@ -15,30 +14,29 @@ export class RotaController {
             }
 
             //verificar se lat e lng são números
-            if (origem.lat === undefined || origem.lng === undefined ||
-                destino.lat === undefined || destino.lng === undefined
+            if (origem.latitude === undefined || origem.longitude === undefined ||
+                destino.latitude === undefined || destino.longitude === undefined
             ) {
                 return res.status(400).json({ erro: 'Latitude e longitude são obrigatórios.' });
             }
 
-            // Converter para objetos de domínio (como criar coordenada e rota)
-            const coordOrigem = new Coordenada(origem.lat, origem.lng);
-            const coordDestino = new Coordenada(destino.lat, destino.lng);
-            const rotaId = `rota-${Date.now()}`;
-            const novaRota = new Rota(rotaId, coordOrigem, coordDestino);
-            // Executar lógica (que método chamar?)
-            const distancia = novaRota.distanciaTotal;
-            // Formatar resposta
-            return res.status(200).json({
-                id: novaRota.getId,
-                distancia: Math.round(distancia),
-                origem: { lat: origem.lat, lng: origem.lng },
-                destino: { lat: destino.lat, lng: destino.lng },
-                unidade: 'km',
-                calculadoEm: new Date().toISOString(),
-                algoritmo: 'haversine',
-                versaoApi: '1.0.0'
-            });
+            // Criar DTO de entrada
+            const input: CalcularRotaInputDTO = {
+                origem: {
+                    latitude: origem.latitude,
+                    longitude: origem.longitude
+                },
+                destino: {
+                    latitude: destino.latitude,
+                    longitude: destino.longitude
+                }
+            };
+
+            // Controller novo (via Use Case):
+            const useCase = new CalcularRotaUseCase();
+            const resultado = await useCase.executar(input);
+            return res.json(resultado);
+            
         } catch (error: any) {
             // Tratar erros (que status code? que mensagem?)
             if (error.message.includes('Latitude invalidas') || error.message.includes('Longitude invalidas')) {

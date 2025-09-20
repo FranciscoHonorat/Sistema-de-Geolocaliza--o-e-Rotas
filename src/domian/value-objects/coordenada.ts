@@ -10,12 +10,12 @@ export class Coordenada {
     ) {
         // validação: latitude entre -90 e 90
         if (latitude < -90 || latitude > 90) {
-            throw new Error('Latitude inválida');
+            throw new Error(`Latitude inválida: ${latitude}. Deve estar entre -90 e 90`);
         }
 
         // validação: longitude entre -180 e 180
         if (longitude < -180 || longitude > 180){
-            throw new Error('Longitude inválida');
+            throw new Error(`Longitude inválida: ${longitude}. Deve estar entre -180 e 180`);
         }
     }
 
