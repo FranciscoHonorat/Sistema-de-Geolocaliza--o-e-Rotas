@@ -18,7 +18,7 @@ export class ErrorHandlerMiddleware {
         res.status(500).json({
             error: 'Error interno do servidor',
             message: isDev ? erro.message: 'Algo deu errado',
-            timestampo: new Date().toISOString()
+            timestamp: new Date().toISOString()
         });
     };
 }
