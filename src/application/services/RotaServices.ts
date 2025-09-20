@@ -1,6 +1,6 @@
 import { CalcularRotaInputDTO, CalcularRotaOutputDTO } from '../dtos';
-import { CalcularRotaUseCase } from '../use-cases/CalcularRotaUseCase';
 import type { IEnderecoRepository } from '../interfaces/repositories/IEnderecoRepository';
+import { CalcularRotaUseCase } from '../use-cases/CalcularRotaUseCase';
 
 interface Dependencies {
     enderecoRepository: IEnderecoRepository;

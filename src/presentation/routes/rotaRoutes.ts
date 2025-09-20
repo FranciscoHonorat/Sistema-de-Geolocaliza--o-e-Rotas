@@ -1,7 +1,7 @@
 import { Router } from 'express';
+import type { IEnderecoRepository } from '../../application/interfaces/repositories/IEnderecoRepository';
 import { CalcularRotaUseCase } from '../../application/use-cases/CalcularRotaUseCase';
 import { RotaController } from '../controllers/RotaController';
-import type { IEnderecoRepository } from '../../application/interfaces/repositories/IEnderecoRepository';
 
 const router = Router();
 
