@@ -1,23 +1,28 @@
-import { IEnderecoRepository } from '../../application/interfaces/repositories/IEnderecoRepository';
-import { BuscarEnderecoOutputDTO } from '../../application/dtos';
+import type { BuscarEnderecoOutputDTO } from "../../application/dtos/BuscarEnderecoOutputDTO";
+import type { IEnderecoRepository } from "../../application/interfaces";
 
 export class MemoryEnderecoRepository implements IEnderecoRepository {
-    private _enderecos = new Map<string, BuscarEnderecoOutputDTO>();
+    //Simuular banco com map
+
+    private enderecos = new Map<string, BuscarEnderecoOutputDTO>();
 
     async buscarPorCep(cep: string): Promise<BuscarEnderecoOutputDTO | null> {
         return {
-            endereco: `${cep} - Rua Exemplo, Bairro Exemplo, Cidade Exemplo - EX`,
-            coordenadas: { latitude: -23.55, longitude: -46.63 },
+            enderecoCompleto: `${cep} - Rua Exemplo, Bairro Exemplo, Cidade Exemplo - EX`,
+            rua: "Rua Exemplo",
+            bairro: "Bairro Exemplo",
+            cidade: "São Paulo",
+            estado: "SP",
+            pais: "Brasil",
             cep,
-            cidade: 'Cidade Exemplo',
-            estado: 'EX',
-            pais: 'Brasil'
+            coordenadas: {
+                //correção de coordenadas fictícias
+                latitude: -23.5505 + (Math.random() - 0.5) * 0.1,
+                longitude: -46.6333 + (Math.random() - 0.5) * 0.1
+            },
+            provedor: "Memory Mock",
+            calculadoEm: new Date().toISOString(),
+            tempoDeProcessamento: Math.random() * 100
         };
-    }
-
-    async salvar(endereco: BuscarEnderecoOutputDTO): Promise<void> {
-        if (endereco.cep) {
-            this._enderecos.set(endereco.cep, endereco);
-        }
     }
 }

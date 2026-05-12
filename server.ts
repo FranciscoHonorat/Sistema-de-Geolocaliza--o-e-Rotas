@@ -1,50 +1,62 @@
-import 'dotenv/config';
+import cors from 'cors';
 import express from 'express';
-import path from 'path';
-import rotaRoutes from './src/presentation/routes/rotaRoutes';
-import { ErrorHandlerMiddleware } from './src/presentation/middlewares/error-handling/ErrorHandlerMiddleware';
-import { RequestLoggerMiddleware } from './src/presentation/middlewares/logging/RequestLoggerMiddleware';
-import { CorsMiddleware } from './src/presentation/middlewares/security/CorsMiddleware';
+import morgan from 'morgan';
+import apiRoutes from './src/presentation/routes';
 
 const app = express();
 const port = process.env.PORT || 3000;
 
 // Middlewares
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(CorsMiddleware);
-app.use(RequestLoggerMiddleware);
+app.use(cors());
+app.use(morgan('combined'));
 
-// Servir frontend compilado (produção)
-app.use(express.static(path.join(__dirname, '../dist-frontend')));
+// UMA linha para todas as rotas da API
+app.use('/api', apiRoutes);
 
-// Rotas da API
-app.use('/api', rotaRoutes);
-
-// Health check
-app.get('/health', (_req, res) => {
-    res.json({ 
-        status: 'OK', 
-        timestamp: new Date(),
-        uptime: process.uptime()
+// Rotas auxiliares
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'OK',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        version: '1.0.0'
     });
 });
 
-// Servir index.html para qualquer rota não-API (SPA)
-app.get('*', (req, res) => {
-    if (!req.path.startsWith('/api')) {
-        res.sendFile(path.join(__dirname, '../dist-frontend', 'index.html'));
+app.get('/', (req, res) => {
+    res.status(200).json({
+        nome: 'API de Geolocalização e Rotas',
+        versao: '1.0.0',
+        endpoints: {
+            'POST /api/rotas/calcular': 'Calcula distância entre dois pontos',
+            'GET /health': 'Verifica status da API',
+            'GET /': 'Documentação da API'
+        },
+        exemplo: {
+            url: 'POST /api/rotas/calcular',
+            body: {
+                origem: { lat: -23.5505, lng: -46.6333 },
+                destino: { lat: -22.9068, lng: -43.1729 }
+            }
+        }
+    });
+});
+
+//Tratamento de erro global
+app.use((error: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error('Erro global: ', error.message);
+    
+    // Se resposta já foi enviada, delega para Express
+    if (res.headersSent) {
+        return next(error);
     }
+    
+    res.status(500).json({ erro: 'Erro interno do servidor.' });
+    // Não chama next() aqui
 });
 
-// Tratamento de erro global
-const errorHandler = new ErrorHandlerMiddleware();
-app.use(errorHandler.handle);
-
-// Inicializar servidor
+//Inicializar servidor
 app.listen(port, () => {
-    console.log(`🚀 Servidor rodando na porta ${port}`);
-    console.log(`📍 Frontend: http://localhost:${port}`);
-    console.log(`📍 API: http://localhost:${port}/api`);
-    console.log(`📍 Health: http://localhost:${port}/health`);
-});
+    console.log(`Servidor rodando em http://localhost:${port}`);
+})

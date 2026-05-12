@@ -1,8 +1,12 @@
-import { Rota } from '../../../domian/entities/rota';
 
+import type { Rota } from "../../../domian/entities/rota";
 export interface IRotaRepository {
-    save(rota: Rota): Promise<void>;
-    findById(id: string): Promise<Rota | null>;
-    findAll(): Promise<Rota[]>;
-    findByUsuarioId(usuarioId: string): Promise<Rota[]>;
+  // Salvar rota calculada
+  salvar(rota: Rota): Promise<string>; // retorna ID
+  
+  // Buscar rota por ID
+  buscarPorId(id: string): Promise<Rota | null>;
+  
+  // Histórico de rotas do usuário
+  buscarPorUsuario(usuarioId: string): Promise<Rota[]>;
 }

@@ -1,10 +1,21 @@
-import { CoordenadaDTO } from './CoordenadaDTO';
-
 export interface BuscarEnderecoOutputDTO {
-    endereco: string;
-    coordenadas: CoordenadaDTO;
+    enderecoCompleto: string;
+
+    //componentes separados
+    rua?: string;
+    numero?: string;
+    bairro?: string;
+    cidade: string;
+    estado: string;
+    pais: string;
     cep?: string;
-    cidade?: string;
-    estado?: string;
-    pais?: string;
+
+    //metadados
+    coordenadas: {
+        latitude: number;
+        longitude: number;
+    };
+    provedor: string;
+    calculadoEm: string;
+    tempoDeProcessamento: number; // em ms
 }

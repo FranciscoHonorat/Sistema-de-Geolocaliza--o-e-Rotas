@@ -1,35 +1,46 @@
-import { CoordenadaDTO } from '../../application/dtos';
+import { Coordenada } from '../value-objects/coordenada';
 
 export class Rota {
-    private _id: string;
-    private _origem: CoordenadaDTO;
-    private _destino: CoordenadaDTO;
-    private _criadoEm: Date;
-
-    constructor(origem: CoordenadaDTO, destino: CoordenadaDTO) {
-        this._id = this.gerarId();
-        this._origem = origem;
-        this._destino = destino;
-        this._criadoEm = new Date();
+    constructor(
+        private id: string,
+        private origem: Coordenada,
+        private destino: Coordenada,
+    ) {
+        // Validação de ID
+        if (!id || id.trim() === '') {
+            throw new Error('ID da rota é obrigatório');
+        }
+        
+        // Validação de coordenadas
+        if (!origem || !destino) {
+            throw new Error('Origem e destino são obrigatórios');
+        }
+        
+        // Validação de origem ≠ destino (opcional)
+        if (this.saoIguais(origem, destino)) {
+            throw new Error('Origem e destino não podem ser iguais');
+        }
+    }
+    
+    private saoIguais(coord1: Coordenada, coord2: Coordenada): boolean {
+        // Implementar comparação de coordenadas
+        return false; // Simplificado por enquanto
     }
 
-    get id(): string {
-        return this._id;
+    get distanciaTotal(): number {
+        return this.origem.distanciaAte(this.destino);
     }
 
-    get origem(): CoordenadaDTO {
-        return this._origem;
+    // Getters úteis para acessar os dados
+    get getId(): string {
+        return this.id;
     }
 
-    get destino(): CoordenadaDTO {
-        return this._destino;
+    get getOrigem(): Coordenada {
+        return this.origem;
     }
 
-    get criadoEm(): Date {
-        return this._criadoEm;
-    }
-
-    private gerarId(): string {
-        return `rota_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    get getDestino(): Coordenada {
+        return this.destino;
     }
 }

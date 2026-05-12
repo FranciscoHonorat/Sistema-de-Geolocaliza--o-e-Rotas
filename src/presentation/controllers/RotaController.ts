@@ -1,71 +1,57 @@
 import { Request, Response } from 'express';
-import { IBuscarEnderecoUseCase } from '../../application/interfaces/use-cases/IBuscarEnderecoUseCase';
-import { ICalcularRotaUseCase } from '../../application/interfaces/use-cases/ICalcularRotaUseCase';
+import { CalcularRotaInputDTO, CalcularRotaUseCase } from '../../application';
 
 export class RotaController {
-    constructor(
-        private buscarEnderecoUseCase: IBuscarEnderecoUseCase,
-        private calcularRotaUseCase: ICalcularRotaUseCase
-    ) {}
+    constructor(private calcularRotaUseCase: CalcularRotaUseCase) {}
 
-    buscarEndereco = async (req: Request, res: Response): Promise<void> => {
+    async calcularDistancia(req: Request, res: Response) {
         try {
-            const { cep, endereco } = req.query;
+            // Extrair dados
+            const { origem, destino } = req.body;
 
-            if (!cep && !endereco) {
-                res.status(400).json({
-                    success: false,
-                    error: 'CEP ou endereço é obrigatório'
-                });
-                return;
-            }
-
-            const resultado = await this.buscarEnderecoUseCase.execute({
-                cep: cep as string,
-                endereco: endereco as string
-            });
-
-            res.status(200).json({
-                success: true,
-                data: resultado
-            });
-        } catch (error: any) {
-            res.status(400).json({
-                success: false,
-                error: error.message || 'Erro ao buscar endereço'
-            });
-        }
-    };
-
-    calcularRota = async (req: Request, res: Response): Promise<void> => {
-        try {
-            const { origem, destino, modoViagem } = req.body;
-
+            // validar dados - ( o que validar aqui )
+            //verificar se campos existem
             if (!origem || !destino) {
-                res.status(400).json({
-                    success: false,
-                    error: 'Origem e destino são obrigatórios'
-                });
-                return;
+                return res.status(400).json({ erro: 'Origem e destino são obrigatórios.' });
             }
 
-            const resultado = await this.calcularRotaUseCase.execute({
-                origem,
-                destino,
-                modoViagem: modoViagem || 'driving'
-            });
+            //verificar se lat e lng são números
+            if (origem.latitude === undefined || origem.longitude === undefined ||
+                destino.latitude === undefined || destino.longitude === undefined
+            ) {
+                return res.status(400).json({ erro: 'Latitude e longitude são obrigatórios.' });
+            }
 
-            res.status(200).json({
-                success: true,
-                data: resultado
-            });
+            // Criar DTO de entrada
+            const input: CalcularRotaInputDTO = {
+                origem: {
+                    latitude: origem.latitude,
+                    longitude: origem.longitude
+                },
+                destino: {
+                    latitude: destino.latitude,
+                    longitude: destino.longitude
+                }
+            };
+
+            // Controller novo (via Use Case):
+            const resultado = await this.calcularRotaUseCase.executar(input);
+            return res.json(resultado);
+            
         } catch (error: any) {
-            res.status(400).json({
-                success: false,
-                error: error.message || 'Erro ao calcular rota'
-            });
+            // Tratar erros (que status code? que mensagem?)
+            if (error.message.includes('Latitude invalidas') || error.message.includes('Longitude invalidas')) {
+                return res.status(400).json({
+                    erro: error.message,
+                    codigo: 'Coordenada_invalida',
+                });
+            }
+
+            //Erro interno do servidor
+            console.error('error interno: ', error);
+            return res.status(500).json({ erro: 'Erro interno do servidor.' });
         }
-    };
+    }
 }
 
 

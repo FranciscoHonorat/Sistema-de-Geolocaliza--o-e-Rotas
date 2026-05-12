@@ -1,7 +1,9 @@
 // O que precisamos receber?
 export interface BuscarEnderecoInputDTO {
-    cep?: string;
-    endereco?: string;
-    latitude?: number;
-    longitude?: number;
+    latitude: number;
+    longitude: number;
+    
+    // Opcionais para futuro:
+    idioma?: 'pt' | 'en' | 'es';
+    nivelDetalhamento?: 'basico' | 'completo';
 }

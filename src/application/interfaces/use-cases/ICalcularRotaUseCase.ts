@@ -1,4 +1,4 @@
-import { CalcularRotaInputDTO, CalcularRotaOutputDTO } from '../../dtos';
+import type { CalcularRotaInputDTO, CalcularRotaOutputDTO } from '../../dtos';
 
 /**
  * Interface que define o contrato para cálculo de rotas
@@ -33,5 +33,5 @@ export interface ICalcularRotaUseCase {
      * });
      * ```
      */
-    execute(input: CalcularRotaInputDTO): Promise<CalcularRotaOutputDTO>;
+    executar(input: CalcularRotaInputDTO): Promise<CalcularRotaOutputDTO>;
 }

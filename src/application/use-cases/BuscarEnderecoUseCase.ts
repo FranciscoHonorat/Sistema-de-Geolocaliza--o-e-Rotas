@@ -1,72 +1,74 @@
-import { IBuscarEnderecoUseCase } from '../interfaces/use-cases/IBuscarEnderecoUseCase';
-import { BuscarEnderecoInputDTO, BuscarEnderecoOutputDTO } from '../dtos';
-import { IMapProvider } from '../interfaces/infrastructure/IMapProvider';
-import { ICacheService } from '../interfaces/infrastructure/ICacheService';
-import { ILogger } from '../interfaces/infrastructure/ILogger';
+import { BuscarEnderecoInputDTO, BuscarEnderecoOutputDTO } from "../dtos";
 
-export class BuscarEnderecoUseCase implements IBuscarEnderecoUseCase {
-    constructor(
-        private mapProvider: IMapProvider,
-        private cacheService: ICacheService,
-        private logger: ILogger
-    ) {}
+export class BuscarEnderecoUseCase {
+    // método 1: validação
+    private validarInput(input: BuscarEnderecoInputDTO): void {
+        // validar coordenadas
+        if (typeof input.latitude !== 'number' || typeof input.longitude !== 'number') {
+            throw new Error('Latitude e longitude devem ser números.');
+        }
 
-    async execute(input: BuscarEnderecoInputDTO): Promise<BuscarEnderecoOutputDTO> {
-        try {
-            const cacheKey = `endereco:${input.cep || input.endereco}`;
-            const cached = await this.cacheService.get<BuscarEnderecoOutputDTO>(cacheKey);
+        // validar faixa de valores
+        if (input.latitude < -90 || input.latitude > 90) {
+            throw new Error('Latitude inválida. Deve estar entre -90 e 90.');
+        }
 
-            if (cached) {
-                this.logger.info('Endereço encontrado no cache');
-                return cached;
-            }
-
-            let resultado: BuscarEnderecoOutputDTO;
-
-            if (input.cep) {
-                resultado = await this.buscarPorCEP(input.cep);
-            } else if (input.endereco) {
-                resultado = await this.buscarPorEndereco(input.endereco);
-            } else {
-                throw new Error('CEP ou endereço é obrigatório');
-            }
-
-            await this.cacheService.set(cacheKey, resultado, 86400);
-            this.logger.info(`Endereço encontrado: ${resultado.endereco}`);
-
-            return resultado;
-        } catch (error) {
-            this.logger.error('Erro ao buscar endereço', error as Error);
-            throw error;
+        if (input.longitude < -180 || input.longitude > 180) {
+            throw new Error('Longitude inválida. Deve estar entre -180 e 180.');
         }
     }
 
-    private async buscarPorCEP(cep: string): Promise<BuscarEnderecoOutputDTO> {
-        const resultado = await this.mapProvider.geocode(cep);
-        return {
-            endereco: resultado.formatted_address,
-            coordenadas: {
-                latitude: resultado.location.latitude,
-                longitude: resultado.location.longitude
+    // método 2: buscar endereço
+    private async buscarEndereco(latitude: number, longitude: number): Promise<any> {
+        const enderecosMock: { [key: string]: any } = {
+            "-23.5505,-46.6333": {
+                endereco: "Avenida Paulista, 1000 - Bela Vista, São Paulo - SP",
+                cidade: "São Paulo",
+                estado: "SP",
+                pais: "Brasil"
             },
-            cep,
-            cidade: resultado.city,
-            estado: resultado.state,
-            pais: resultado.country
+            "-22.9068,-43.1729": {
+                endereco: "Copacabana, Rio de Janeiro - RJ",
+                cidade: "Rio de Janeiro", 
+                estado: "RJ",
+                pais: "Brasil"
+            }
         };
+        
+        const chave = `${latitude},${longitude}`;
+        await new Promise(resolve => setTimeout(resolve, 50));
+        
+        return enderecosMock[chave] || null;
     }
 
-    private async buscarPorEndereco(endereco: string): Promise<BuscarEnderecoOutputDTO> {
-        const resultado = await this.mapProvider.geocode(endereco);
-        return {
-            endereco: resultado.formatted_address,
-            coordenadas: {
-                latitude: resultado.location.latitude,
-                longitude: resultado.location.longitude
-            },
-            cidade: resultado.city,
-            estado: resultado.state,
-            pais: resultado.country
+    //métod 3 execução principal
+    async executar(input: BuscarEnderecoInputDTO): Promise<BuscarEnderecoOutputDTO> {
+        // 1. Validar entrada
+        this.validarInput(input);
+
+        // 2. Medir tempo de processamento
+        const inicio = Date.now();
+
+        // 3. Buscar endereço
+        const resultado = await this.buscarEndereco(input.latitude, input.longitude);
+        if (!resultado) {
+            throw new Error('Endereço não encontrado para as coordenadas fornecidas.');
+        }
+
+        const fim = Date.now();
+
+        // 4. Transformar resultado seguindo DTO COMPLETO
+        const output: BuscarEnderecoOutputDTO = {
+            enderecoCompleto: resultado.endereco,  
+            cidade: resultado.cidade,              
+            estado: resultado.estado,              
+            pais: resultado.pais,                  
+            coordenadas: { latitude: input.latitude, longitude: input.longitude }, 
+            provedor: 'mock-interno',              
+            calculadoEm: new Date().toISOString(), 
+            tempoDeProcessamento: fim - inicio     
         };
+
+        return output;
     }
 }

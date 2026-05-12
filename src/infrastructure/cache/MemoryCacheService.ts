@@ -1,29 +1,33 @@
-import { ICacheService } from '../../application/interfaces/infrastructure/ICacheService';
+import type { ICacheService } from "../../application/interfaces";
 
 export class MemoryCacheService implements ICacheService {
-    private cache = new Map<string, { value: any; expireAt: number }>();
+    //Conceito map para armazenar dados
+    private cache = new Map<string, { data: any; expiry?: number }>();
 
-    async get<T>(key: string): Promise<T | null> {
-        const item = this.cache.get(key);
-        
-        if (!item) {
+    async salvar(chave: string, dados: any, ttlSegundos?: number): Promise<void> {
+        const expiry = ttlSegundos ? Date.now() + (ttlSegundos * 1000) : undefined;
+        this.cache.set(chave, { data: dados, expiry });
+    }
+
+    async buscar<T>(chave: string): Promise<T | null> {
+        const item = this.cache.get(chave);
+
+        if (!item) return null;
+
+        //Verificar expiração
+        if (item.expiry && Date.now() > item.expiry) {
+            this.cache.delete(chave);
             return null;
         }
 
-        if (Date.now() > item.expireAt) {
-            this.cache.delete(key);
-            return null;
-        }
-
-        return item.value as T;
+        return item.data as T;
     }
 
-    async set(key: string, value: any, ttl: number = 3600): Promise<void> {
-        const expireAt = Date.now() + ttl * 1000;
-        this.cache.set(key, { value, expireAt });
+    async remover(chave: string): Promise<void> {
+        this.cache.delete(chave);
     }
 
-    async delete(key: string): Promise<void> {
-        this.cache.delete(key);
+    async limpar(): Promise<void> {
+        this.cache.clear();
     }
 }

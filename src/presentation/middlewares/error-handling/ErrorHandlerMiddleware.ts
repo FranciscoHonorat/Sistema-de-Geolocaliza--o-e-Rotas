@@ -1,13 +1,23 @@
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 
 export class ErrorHandlerMiddleware {
-    handle = (erro: Error, _req: Request, res: Response, _next: NextFunction) => {
-        console.error('Erro capturado:', erro.message);
-        console.error('Stack:', erro.stack);
-        
+    constructor(private options: { environment?: string } = {}) {}
+
+    handle = (erro: Error, req: Request, res: Response, next: NextFunction) => {
+        //Log estruturado
+        console.error('Error capturado', {
+            message: erro.message,
+            stack: erro.stack,
+            method: req.method,
+            url: req.url
+        });
+
+        //Conceito resposta baseada no ambiente
+        const isDev = this.options.environment === 'development';
+
         res.status(500).json({
-            success: false,
-            error: erro.message || 'Erro interno do servidor',
+            error: 'Error interno do servidor',
+            message: isDev ? erro.message: 'Algo deu errado',
             timestamp: new Date().toISOString()
         });
     };

@@ -1,20 +1,27 @@
-import { ICacheService } from '../../application/interfaces/infrastructure/ICacheService';
+import type { ICacheService } from "../../application/interfaces";
 
 export class RedisCacheService implements ICacheService {
-    constructor(private _redisUrl: string) {
-        console.log('Redis configurado:', this._redisUrl);
+    constructor(private redisUrl: string) {
+        //TODO: conectar ao redis quando implmentar
     }
 
-    async get<T>(key: string): Promise<T | null> {
-        console.log('Redis get:', key);
-        return null;
+    async salvar(chave: string, dados: any, ttlSegundos?: number): Promise<void> {
+        // TODO: redis Set com TTL
+        throw new Error("Redis implementação pendente.");
     }
 
-    async set(key: string, _value: any, _ttl?: number): Promise<void> {
-        console.log('Redis set:', key);
+    async buscar<T>(chave: string): Promise<T | null> {
+        // TODO: Redis GET com parse JSON
+        throw new Error("Redis implementação pendente.");
     }
 
-    async delete(key: string): Promise<void> {
-        console.log('Redis delete:', key);
+    async remover(chave: string): Promise<void> {
+        // TODO: Redis DEL
+        throw new Error("Redis implementação pendente.");
+    }
+
+    async limpar(): Promise<void> {
+        // TODO: Redis FLUSHDB
+        throw new Error("Redis implementação pendente.");
     }
 }

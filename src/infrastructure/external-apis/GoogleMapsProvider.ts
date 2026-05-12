@@ -1,80 +1,58 @@
-import axios from 'axios';
-import { IMapProvider } from '../../application/interfaces/infrastructure/IMapProvider';
+import type { BuscarEnderecoOutputDTO, CalcularRotaOutputDTO } from '../../application/dtos';
+import type { IMapProvider } from '../../application/interfaces/infrastructure/IMapProvider';
+import type { Coordenada } from '../../domian/value-objects/coordenada';
 
 export class GoogleMapsProvider implements IMapProvider {
-    private apiKey: string;
-    private baseUrl = 'https://maps.googleapis.com/maps/api';
+    private baseUrl = "https://maps.googleapis.com/maps/api";
 
-    constructor(apiKey: string) {
-        this.apiKey = apiKey;
+    constructor(private apiKey: string) {
+        if(!apiKey) {
+            throw new Error("Google Maps API key is required.");
+        }
     }
 
-    async geocode(address: string): Promise<any> {
-        const response = await this.fetchFromGoogleMaps('geocode/json', { address });
-        
-        if (response.results && response.results.length > 0) {
-            const result = response.results[0];
-            return {
-                location: {
-                    latitude: result.geometry.location.lat,
-                    longitude: result.geometry.location.lng
-                },
-                formatted_address: result.formatted_address,
-                city: result.address_components.find((c: any) => c.types.includes('locality'))?.long_name,
-                state: result.address_components.find((c: any) => c.types.includes('administrative_area_level_1'))?.short_name,
-                country: result.address_components.find((c: any) => c.types.includes('country'))?.long_name
-            };
+    //Conceito: sempre validar configurações no constructor.
+    validarCoordenadas(latitude: number, longitude: number): boolean {
+        return latitude >= -90 && latitude <= 90 && longitude >= -180 && longitude <= 180;
+    }
+
+    //Conceito: encapsular chamadas externas em métodos privados.
+    private async fetchFromGoogleMaps(endpoint: string, params: Record<string, string>): Promise<any> {
+        const url = new URL(`${this.baseUrl}/${endpoint}`);
+        params.key = this.apiKey;
+        Object.entries(params).forEach(([key, value]) => url.searchParams.append(key, value));
+        const response = await fetch(url.toString());
+        if (!response.ok) {
+            throw new Error(`Error fetching ${endpoint}: ${response.statusText}`);
+        }
+        return response.json();
+    }
+
+    //Conceito: métodos públicos claros e focados.
+    async buscarEnderecoPorCoordenadas(latitude: number, longitude: number): Promise<BuscarEnderecoOutputDTO> {
+        if (!this.validarCoordenadas(latitude, longitude)) {
+            throw new Error("Coordenadas inválidas.");
         }
         
-        throw new Error('Endereço não encontrado');
+        //TODO: fazer requisição http
+        // TODO: Transformar resposta Google → DTO
+        const data = await this.fetchFromGoogleMaps('geocode/json', { latlng: `${latitude},${longitude}` });
+        
+        // TODO: Transformar resposta real do Google Maps
+        throw new Error('Google Maps implementation pending');
     }
 
-    async reverseGeocode(lat: number, lng: number): Promise<any> {
-        const response = await this.fetchFromGoogleMaps('geocode/json', { latlng: `${lat},${lng}` });
+    async calcularRota(origem: Coordenada, destino: Coordenada): Promise<CalcularRotaOutputDTO> {
+        // 🎓 CONCEITO: Como Coordenada não expõe getters, vamos usar uma abordagem diferente
+        // TODO: Adicionar getters na classe Coordenada ou usar outra estratégia
         
-        if (response.results && response.results.length > 0) {
-            const result = response.results[0];
-            return {
-                location: { latitude: lat, longitude: lng },
-                formatted_address: result.formatted_address
-            };
-        }
+        //TODO: Implementar Directions API
+        // const data = await this.fetchFromGoogleMaps('directions/json', { 
+        //     origin: `lat,lng`,
+        //     destination: `lat,lng`
+        // });
         
-        throw new Error('Local não encontrado');
-    }
-
-    async getDirections(origin: any, destination: any, mode: string): Promise<any> {
-        const originStr = `${origin.latitude},${origin.longitude}`;
-        const destinationStr = `${destination.latitude},${destination.longitude}`;
-        
-        const response = await this.fetchFromGoogleMaps('directions/json', {
-            origin: originStr,
-            destination: destinationStr,
-            mode
-        });
-
-        if (response.routes && response.routes.length > 0) {
-            const route = response.routes[0];
-            const leg = route.legs[0];
-            
-            return {
-                distance: leg.distance.value / 1000,
-                duration: leg.duration.value / 60,
-                steps: leg.steps.map((step: any) => ({
-                    distancia: step.distance.value / 1000,
-                    duracao: step.duration.value / 60,
-                    instrucao: step.html_instructions.replace(/<[^>]*>/g, '')
-                }))
-            };
-        }
-
-        throw new Error('Rota não encontrada');
-    }
-
-    private async fetchFromGoogleMaps(endpoint: string, params: any): Promise<any> {
-        const response = await axios.get(`${this.baseUrl}/${endpoint}`, {
-            params: { ...params, key: this.apiKey }
-        });
-        return response.data;
+        //TODO: Transformar resposta Google → DTO
+        throw new Error('Google Maps Directions implementation pending');
     }
 }

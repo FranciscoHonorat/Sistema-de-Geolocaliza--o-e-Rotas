@@ -1,44 +1,53 @@
 import { Router } from 'express';
-import { RotaController } from '../controllers/RotaController';
-import { BuscarEnderecoUseCase } from '../../application/use-cases/BuscarEnderecoUseCase';
+import type { IEnderecoRepository } from '../../application/interfaces/repositories/IEnderecoRepository';
 import { CalcularRotaUseCase } from '../../application/use-cases/CalcularRotaUseCase';
-import { OpenStreetMapProvider } from '../../infrastructure/external-apis/OpenStreetMap';
-import { MemoryCacheService } from '../../infrastructure/cache/MemoryCacheService';
-import { ConsoleLogger } from '../../infrastructure/external-apis/ConsoleLogger';
-import { MemoryRotaRepository } from '../../infrastructure/database/MemoryRotaRepository';
-import { HaversineDistanceCalculator } from '../../domian/services/HaversineDistanceCalculator';
+import { RotaController } from '../controllers/RotaController';
 
 const router = Router();
 
-// Instanciar providers e serviços
-const mapProvider = new OpenStreetMapProvider();
-const cacheService = new MemoryCacheService();
-const logger = new ConsoleLogger();
-const rotaRepository = new MemoryRotaRepository();
-const distanceCalculator = new HaversineDistanceCalculator();
+// 🔧 Mock Repository para testes (substitui banco de dados)
+const mockEnderecoRepository: IEnderecoRepository = {
+  async buscarPorCep(cep: string) {
+    // Mock simples - retorna estrutura completa do DTO
+    return {
+      enderecoCompleto: `${cep} - Rua Teste, Centro, São Paulo - SP`,
+      rua: "Rua Teste",
+      bairro: "Centro", 
+      cidade: "São Paulo",
+      estado: "SP",
+      pais: "Brasil",
+      cep,
+      coordenadas: { latitude: -23.5505, longitude: -46.6333 },
+      provedor: "Mock",
+      calculadoEm: new Date().toISOString(),
+      tempoDeProcessamento: 50
+    };
+  }
+};
 
-// Instanciar Use Cases
-const buscarEnderecoUseCase = new BuscarEnderecoUseCase(
-    mapProvider,
-    cacheService,
-    logger
-);
+// ✅ Dependency Injection correto
+const calcularRotaUseCase = new CalcularRotaUseCase(mockEnderecoRepository);
+const rotaController = new RotaController(calcularRotaUseCase);
 
-const calcularRotaUseCase = new CalcularRotaUseCase(
-    mapProvider,
-    rotaRepository,
-    distanceCalculator,
-    logger
-);
+// Todas as rotas de /api/rotas/*
+router.post('/calcular', (req, res) => {
+    rotaController.calcularDistancia(req, res);
+});
 
-// Instanciar Controller
-const rotaController = new RotaController(
-    buscarEnderecoUseCase,
-    calcularRotaUseCase
-);
+router.get('/historico', (req, res) => {
+    // Futura: lista de histórico de rotas
+    res.status(501).json({ 
+        message: 'Funcionalidade em desenvolvimento',
+        endpoint: 'GET /api/rotas/historico'
+    });
+});
 
-// Definir rotas
-router.get('/endereco', rotaController.buscarEndereco);
-router.post('/rota', rotaController.calcularRota);
+router.delete('/:id', (req, res) => {
+    // Futura: delete de rota específica por id
+    res.status(501).json({ 
+        message: 'Funcionalidade em desenvolvimento',
+        endpoint: `DELETE /api/rotas/${req.params.id}`
+    });
+});
 
 export default router;

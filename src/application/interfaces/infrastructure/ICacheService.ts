@@ -1,10 +1,13 @@
 export interface ICacheService {
     // Salvar dados no cache
-    set(key: string, value: any, ttl?: number): Promise<void>;
-
+    salvar(chave: string, dados: any, ttlSegundos?: number): Promise<void>;
+    
     // Buscar dados do cache
-    get<T>(key: string): Promise<T | null>;
-
+    buscar<T>(chave: string): Promise<T | null>;
+    
     // Remover do cache
-    delete(key: string): Promise<void>;
+    remover(chave: string): Promise<void>;
+    
+    // Limpar cache completo
+    limpar(): Promise<void>;
 }
