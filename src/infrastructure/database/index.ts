@@ -1,0 +1,1 @@
+export { MemoryEnderecoRepository } from './MemoryEnderecoRepository';

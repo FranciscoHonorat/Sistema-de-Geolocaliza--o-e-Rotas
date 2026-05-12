@@ -1,0 +1,9 @@
+Sistema de Geolocalização e Rotas
+
+    Descrição: Desenvolva uma API que ofereça geolocalização, cálculo de rotas otimizadas e integração com mapas (ex.: Google Maps API).
+
+    Tecnologias: Node.js, Express, Google Maps API ou OpenStreetMap, PostgreSQL/PostGIS (para dados geospaciais).
+
+    Habilidades demonstradas: Integração com APIs externas, manipulação de dados geospaciais, optimização de queries espaciais.
+
+    Dica: Adiciente caching de rotas usando Redis para melhorar performance 
